@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bitácora de Trabajo · Repositorio del Taller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A; --paper:#FBF6EA; --paper-line:#E6DCC2; --muted:#7C7361;
+    --amber:#C98A2C; --teal:#2E7D6B; --plum:#7A4B6E; --coral:#B8482F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif; color:var(--ink);
+    background:
+      repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--paper-line) 28px),
+      var(--paper);
+    min-height:100vh; padding-bottom:90px; position:relative;
+  }
+  .hero{position:relative; background:var(--ink); color:var(--paper); padding:40px 24px 34px; overflow:hidden;}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -10%, rgba(201,138,44,0.35), transparent 55%);pointer-events:none;}
+  .hero-tape{position:absolute;top:-10px;left:32px;width:90px;height:26px;background:rgba(201,138,44,0.85);transform:rotate(-4deg);box-shadow:0 3px 6px rgba(0,0,0,0.25);}
+  .hero-inner{max-width:780px;margin:0 auto;position:relative;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#E8C888;margin-bottom:10px;}
+  .hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,5vw,42px);line-height:1.1;margin:0 0 6px;}
+  .hero-sub{font-family:'Fraunces',serif;font-style:italic;font-size:17px;color:#C9BFA0;margin:0 0 20px;}
+  .hero-copy p{font-size:15px;line-height:1.6;color:#E7E1D0;max-width:640px;margin:0 0 20px;}
+  .pin-note{display:flex;gap:12px;align-items:flex-start;background:#F1E4B8;color:#3A2E14;border-radius:3px;padding:14px 16px;max-width:640px;box-shadow:0 6px 14px rgba(0,0,0,0.25);transform:rotate(-.6deg);}
+  .pin-dot{width:10px;height:10px;border-radius:50%;background:var(--coral);margin-top:5px;flex-shrink:0;box-shadow:0 0 0 3px rgba(184,72,47,.2);}
+  .pin-note strong{font-family:'Fraunces',serif;font-size:14.5px;}
+  .pin-note p{margin:4px 0 0;font-size:13.5px;line-height:1.5;}
+
+  .sync-bar{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted);}
+  .sync-left{display:flex;align-items:center;gap:6px;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,125,107,.45);}70%{box-shadow:0 0 0 7px rgba(46,125,107,0);}100%{box-shadow:0 0 0 0 rgba(46,125,107,0);}}
+  .sync-sep{opacity:.5;}
+  .btn-ghost{background:none;border:1px solid var(--paper-line);border-radius:6px;padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);cursor:pointer;}
+  .btn-ghost:hover{background:rgba(0,0,0,.04);}
+
+  .tabs{max-width:1080px;margin:14px auto 0;display:flex;gap:6px;padding:0 24px;flex-wrap:wrap;}
+  .tab{--tab-color:var(--ink);--tab-soft:#eee;font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;border:none;cursor:pointer;padding:10px 16px 9px;display:flex;align-items:center;gap:8px;background:#EFE7D2;color:var(--muted);clip-path:polygon(10px 0,100% 0,100% 100%,0 100%);border-radius:8px 8px 0 0;transition:transform .15s ease;}
+  .tab:hover{transform:translateY(-2px);}
+  .tab.active{background:var(--tab-soft);color:var(--tab-color);box-shadow:0 -2px 0 var(--tab-color) inset;}
+  .tab-num{width:18px;height:18px;border-radius:50%;background:var(--tab-color);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tab-count{font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:10px;}
+
+  .main{max-width:1080px;margin:0 auto;padding:24px;}
+  .loading-block{text-align:center;padding:60px 0;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+  .config-warning{background:#FBE4DC;color:var(--coral);border:1px solid var(--coral);border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:20px;line-height:1.6;}
+  .config-warning code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;}
+
+  .jump-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .jump-label{font-size:12.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .jump-chip{--chip-color:var(--ink);border:1px solid var(--chip-color);color:var(--chip-color);background:#fff;border-radius:20px;padding:5px 13px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .jump-chip:hover{background:var(--chip-color);color:#fff;}
+  .todos-section{margin-bottom:46px;}
+  .todos-section:last-child{margin-bottom:0;}
+
+  .cordon-view{--c-color:var(--ink);--c-soft:#eee;}
+  .cordon-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:16px;border-bottom:2px solid var(--c-color);}
+  .cordon-badge{width:46px;height:46px;border-radius:50%;background:var(--c-color);color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cordon-header h2{font-family:'Fraunces',serif;font-size:24px;margin:0;color:var(--c-color);}
+  .cordon-header p{margin:2px 0 0;font-size:13px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+
+  .encuentro-block{margin-bottom:30px;}
+  .encuentro-head{margin-bottom:14px;}
+  .encuentro-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:3px 9px;border-radius:4px;margin-bottom:7px;}
+  .encuentro-head h3{font-family:'Fraunces',serif;font-style:italic;font-size:19px;margin:0 0 4px;}
+  .encuentro-proposito{font-size:13.5px;color:var(--muted);margin:0;max-width:640px;line-height:1.5;}
+
+  .material-block{margin:16px 0 20px;padding-left:14px;border-left:2px dashed var(--paper-line);}
+  .material-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .material-head h4{font-size:14.5px;margin:0 0 3px;font-weight:600;}
+  .material-detalle{font-size:12.5px;color:var(--muted);margin:0;max-width:560px;line-height:1.5;}
+  .btn-add-here{--c-color:var(--ink);border:1px solid var(--c-color);color:var(--c-color);background:#fff;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .btn-add-here:hover{background:var(--c-color);color:#fff;}
+  .empty-slot{font-size:12.5px;color:var(--muted);font-style:italic;padding:12px 0;}
+
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  .post-card{background:#fff;border:1px solid var(--paper-line);border-radius:10px;overflow:hidden;position:relative;box-shadow:0 2px 6px rgba(27,42,74,.06);}
+  .stamp{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;border:2px solid var(--coral);color:var(--coral);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;background:rgba(255,255,255,.85);transform:rotate(8deg);z-index:2;}
+  .post-thumb{display:block;background:#F2ECDC;}
+  .post-thumb img{width:100%;height:140px;object-fit:cover;display:block;}
+  .post-file{display:flex;align-items:center;gap:8px;padding:14px;background:#F2ECDC;text-decoration:none;color:var(--ink);font-size:12.5px;font-weight:600;}
+  .post-file-icon{font-size:18px;}
+  .post-file-name{word-break:break-word;}
+  .post-body{padding:12px 14px 14px;}
+  .post-title{font-family:'Fraunces',serif;font-size:15px;margin:0 0 6px;line-height:1.3;}
+  .post-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 8px;}
+  .post-meta{font-size:11.5px;color:var(--ink);display:flex;flex-wrap:wrap;gap:4px;}
+  .post-author{font-weight:700;}
+  .post-sep{color:var(--muted);}
+  .post-time{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:6px;}
+
+  .fab{position:fixed;bottom:22px;right:22px;background:var(--coral);color:#fff;border:none;border-radius:30px;padding:13px 20px 13px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 8px 20px rgba(184,72,47,.4);z-index:30;}
+  .fab:hover{transform:translateY(-2px);}
+  .fab-plus{font-size:18px;line-height:1;}
+  .footer-note{max-width:780px;margin:10px auto 0;padding:0 24px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(27,42,74,.55);display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:100;}
+  .modal{background:var(--paper);border-radius:12px;width:100%;max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.35);margin-bottom:30px;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--paper-line);}
+  .modal-head h3{font-family:'Fraunces',serif;margin:0;font-size:19px;}
+  .modal-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);}
+  .modal-form{padding:18px 20px 22px;display:flex;flex-direction:column;gap:14px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media (max-width:560px){.field-row{grid-template-columns:1fr;}}
+  label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink);}
+  label.full{width:100%;}
+  input,select,textarea{font-family:'Inter',sans-serif;border:1px solid var(--paper-line);border-radius:7px;padding:9px 10px;font-size:13.5px;background:#fff;color:var(--ink);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  textarea{resize:vertical;font-family:'Inter',sans-serif;}
+  .file-preview{display:flex;align-items:center;gap:10px;font-size:12.5px;}
+  .file-preview img{max-width:100px;max-height:70px;border-radius:6px;border:1px solid var(--paper-line);object-fit:cover;}
+  .form-error{background:#FBE4DC;color:var(--coral);padding:8px 10px;border-radius:6px;font-size:12.5px;}
+  .modal-privacy{font-size:11.5px;color:var(--muted);margin:0;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:4px;}
+  .btn-secondary{background:none;border:1px solid var(--paper-line);border-radius:7px;padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink);}
+  .btn-primary{background:var(--ink);color:var(--paper);border:none;border-radius:7px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;}
+  .btn-primary:disabled{opacity:.6;cursor:default;}
+
+  @media (max-width:640px){
+    .hero{padding:32px 18px 26px;}
+    .main{padding:18px;}
+    .fab-label{display:none;}
+    .fab{padding:13px;border-radius:50%;}
+  }
+</style>
+</head>
+<body>
+
+<div id="page"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ================================================================== */
+/*  CONFIGURACIÓN — pegá acá la URL de tu Web App de Apps Script       */
+/* ================================================================== */
+const CONFIG = {
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyRvkUvmcjvCKkv3zRaGqXPPKghhP98p6CtB_4s1NaT1dNnXYrL20sOKzmLG30NS2Bu1A/exec"
+};
+const POLL_MS = 7000;
+
+/* ================================================================== */
+/*  DATOS FIJOS DEL TALLER                                             */
+/* ================================================================== */
+const CORDONES = [
+  { id:'cordon1', num:'1', label:'Cordón 1', color:'#2E7D6B', soft:'#E4F0EC' },
+  { id:'cordon2', num:'2', label:'Cordón 2', color:'#C98A2C', soft:'#F5EBDB' },
+  { id:'cordon3', num:'3', label:'Cordón 3', color:'#7A4B6E', soft:'#EFE3EC' },
+];
+const ENCUENTROS = [
+  {
+    id:'2', titulo:'De preguntar a pensar',
+    proposito:'Registrar la transición de la prueba inicial a un uso estratégico y crítico de la IA como copiloto docente.',
+    materiales:[
+      { id:'e2-1', nombre:'Capturas del Desafío del Encuentro 1 (Comparativa)', detalle:'Captura del prompt inicial (general) y la respuesta recibida. Captura del prompt mejorado (con Rol, Contexto, Formato, Tono y Restricciones) y la nueva respuesta.' },
+      { id:'e2-2', nombre:'Redacción del Mega-Prompt', detalle:'Documento con la consigna avanzada que diseñaste para tu aula o espacio institucional. Breve nota sobre las repreguntas o ajustes que le hiciste a la IA para refinar el resultado.' },
+      { id:'e2-3', nombre:'Experiencia "Hackear el algoritmo"', detalle:'Reflexión corta o capturas sobre cómo cambió tu feed en redes (TikTok, Reels, etc.) tras cambiar intencionalmente tus interacciones.' },
+    ]
+  },
+  {
+    id:'3', titulo:'De pensar a transformar',
+    proposito:'Documentar cómo la IA acompaña la gestión, la diversidad de trayectorias en el aula y los procesos de evaluación.',
+    materiales:[
+      { id:'e3-1', nombre:'Propuesta Didáctica o de Gestión con IA', detalle:'Secuencia, material adaptado o borrador de gestión donde utilizaste la IA como copiloto.' },
+      { id:'e3-2', nombre:'Entregable Integrador — Rúbrica de Evaluación', detalle:'Contexto del proyecto/actividad y del grupo. Prompt utilizado (rol especialista en evaluación de jóvenes y adultos). Rúbrica final validada por vos (3 a 5 criterios, 3 o 4 niveles de desempeño, sin notas numéricas).' },
+    ]
+  }
+];
+const CORDON_BY_ID = Object.fromEntries(CORDONES.map(c=>[c.id,c]));
+const MATERIAL_BY_ID = Object.fromEntries(ENCUENTROS.flatMap(e=>e.materiales.map(m=>[m.id,{...m,encuentro:e.id}])));
+const MAX_IMAGE_DIM = 1280;
+const MAX_DOC_BYTES = 1.6*1024*1024;
+
+/* ================================================================== */
+/*  ESTADO                                                              */
+/* ================================================================== */
+let state = {
+  tab:'cordon1',
+  posts:{cordon1:[],cordon2:[],cordon3:[]},
+  loaded:false,
+  lastSync:null,
+};
+let modalState = {
+  open:false,
+  cordon:'cordon1',
+  encuentro:'2',
+  categoria:'',
+  nombre:'', institucion:'', area:'',
+  titulo:'', descripcion:'',
+  fileMeta:null,
+  fileError:'',
+  formError:'',
+  saving:false,
+};
+
+try {
+  const savedMe = JSON.parse(localStorage.getItem('bitacora_me') || 'null');
+  if (savedMe) { modalState.nombre=savedMe.nombre||''; modalState.institucion=savedMe.institucion||''; modalState.area=savedMe.area||''; }
+} catch(e){}
+
+/* ================================================================== */
+/*  HELPERS                                                             */
+/* ================================================================== */
+function esc(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function timeAgo(iso){
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff/1000);
+  if (s<5) return 'recién';
+  if (s<60) return `hace ${s}s`;
+  const m = Math.floor(s/60);
+  if (m<60) return `hace ${m} min`;
+  const h = Math.floor(m/60);
+  if (h<24) return `hace ${h} h`;
+  return `hace ${Math.floor(h/24)} d`;
+}
+function fmtDate(iso){
+  try {
+    return new Date(iso).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  } catch(e){ return ''; }
+}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const scale = Math.min(1, MAX_IMAGE_DIM/Math.max(img.width,img.height));
+        const w = Math.max(1, Math.round(img.width*scale));
+        const h = Math.max(1, Math.round(img.height*scale));
+        const canvas = document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',0.74));
+      };
+      img.onerror = ()=>reject(new Error('No se pudo leer la imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = ()=>reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+function readAsDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = (e)=>resolve(e.target.result);
+    reader.onerror = ()=>reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ================================================================== */
+/*  API (Google Apps Script)                                           */
+/* ================================================================== */
+function configReady(){
+  return CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.indexOf('http')===0;
+}
+async function fetchCordon(cordon){
+  if (!configReady()) return [];
+  try {
+    const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?cordon=${cordon}`);
+    const json = await res.json();
+    return json.success ? json.posts : [];
+  } catch(e){ return []; }
+}
+async function fetchAll(silent){
+  const [c1,c2,c3] = await Promise.all([fetchCordon('cordon1'),fetchCordon('cordon2'),fetchCordon('cordon3')]);
+  state.posts = { cordon1:c1, cordon2:c2, cordon3:c3 };
+  state.lastSync = new Date();
+  state.loaded = true;
+  renderPage();
+}
+async function submitPost(payload){
+  const res = await fetch(CONFIG.APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Error desconocido');
+  return json.post;
+}
+
+/* ================================================================== */
+/*  RENDER: PÁGINA PRINCIPAL                                           */
+/* ================================================================== */
+function renderPage(){
+  const page = document.getElementById('page');
+  page.innerHTML = `
+    <header class="hero">
+      <div class="hero-tape"></div>
+      <div class="hero-inner">
+        <div class="eyebrow">📚 Bitácora de trabajo</div>
+        <h1>Repositorio compartido del taller</h1>
+        <p class="hero-sub">Espacio de co-creación en tiempo real</p>
+        <div class="hero-copy">
+          <p>¡Bienvenidos/as! Este fichero es un espacio común y de visibilidad colectiva. Aquí iremos cargando las producciones de los Encuentros 2 y 3 para inspirarnos entre colegas, compartir experiencias y construir conocimiento juntos.</p>
+        </div>
+        <div class="pin-note">
+          <span class="pin-dot"></span>
+          <div>
+            <strong>💬 Devoluciones</strong>
+            <p>La revisión y el feedback de los trabajos no se hará por escrito acá, sino que los recuperaremos colectivamente en el <strong>4.º Encuentro Presencial</strong> para debatir, ajustar y enriquecer nuestras propuestas en equipo.</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="sync-bar">
+      <div class="sync-left">
+        <span class="live-dot"></span><span>En vivo</span><span class="sync-sep">·</span>
+        <span>${state.lastSync ? 'Sincronizado ' + esc(timeAgo(state.lastSync.toISOString())) : 'Sincronizando…'}</span>
+      </div>
+      <button class="btn-ghost" id="btn-refresh">↻ Actualizar ahora</button>
+    </div>
+
+    <nav class="tabs">
+      ${CORDONES.map(c => `
+        <button class="tab tab-${c.id} ${state.tab===c.id?'active':''}" style="--tab-color:${c.color};--tab-soft:${c.soft}" data-tab="${c.id}">
+          <span class="tab-num">${c.num}</span>${c.label}
+          <span class="tab-count">${state.posts[c.id].length}</span>
+        </button>`).join('')}
+      <button class="tab ${state.tab==='todos'?'active':''}" style="--tab-color:#1B2A4A;--tab-soft:#EFE7D2" data-tab="todos">✦ Los 3 cordones juntos</button>
+    </nav>
+
+    <main class="main">
+      ${!configReady() ? `
+        <div class="config-warning">
+          ⚠️ Todavía no configuraste el backend. Reemplazá <code>APPS_SCRIPT_URL</code> en el
+          <code>&lt;script&gt;</code> de este archivo por la URL de tu Web App de Google Apps Script
+          (ver README.md).
+        </div>` : ''}
+      ${!state.loaded ? `<div class="loading-block">Cargando la bitácora…</div>` : renderMain()}
+    </main>
+
+    <button class="fab" id="btn-open-upload"><span class="fab-plus">＋</span><span class="fab-label">Subir material</span></button>
+
+    <footer class="footer-note">✨ Exploren las carpetas de sus compañeros/as, tomen ideas y traigan sus dudas e impresiones anotadas para ponerlas en común en nuestro próximo encuentro presencial.</footer>
+  `;
+  bindPageEvents();
+}
+
+function renderMain(){
+  if (state.tab === 'todos'){
+    return `
+      <div class="jump-row">
+        <span class="jump-label">Ir a:</span>
+        ${CORDONES.map(c=>`<button class="jump-chip" style="--chip-color:${c.color}" data-jump="${c.id}">${c.label}</button>`).join('')}
+      </div>
+      ${CORDONES.map(c=>`<div class="todos-section" id="section-${c.id}">${renderCordonView(c, state.posts[c.id], true)}</div>`).join('')}
+    `;
+  }
+  const c = CORDON_BY_ID[state.tab];
+  return renderCordonView(c, state.posts[state.tab], false);
+}
+
+function renderCordonView(cordon, posts, compact){
+  return `
+    <section class="cordon-view" style="--c-color:${cordon.color};--c-soft:${cordon.soft}">
+      <div class="cordon-header">
+        <div class="cordon-badge">${cordon.num}</div>
+        <div>
+          <h2>${cordon.label}</h2>
+          <p>${posts.length} ${posts.length===1?'producción compartida':'producciones compartidas'}</p>
+        </div>
+      </div>
+      ${ENCUENTROS.map(enc => `
+        <div class="encuentro-block">
+          <div class="encuentro-head">
+            <span class="encuentro-tag">Encuentro ${enc.id}</span>
+            <h3>"${esc(enc.titulo)}"</h3>
+            ${!compact ? `<p class="encuentro-proposito">${esc(enc.proposito)}</p>` : ''}
+          </div>
+          ${enc.materiales.map(mat => {
+            const items = posts.filter(p=>p.categoria===mat.id).slice().sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+            return `
+              <div class="material-block">
+                <div class="material-head">
+                  <div>
+                    <h4>${esc(mat.nombre)}</h4>
+                    ${!compact ? `<p class="material-detalle">${esc(mat.detalle)}</p>` : ''}
+                  </div>
+                  <button class="btn-add-here" style="--c-color:${cordon.color}" data-add-here="${cordon.id}|${mat.id}">+ Agregar acá</button>
+                </div>
+                ${items.length===0
+                  ? `<div class="empty-slot">Todavía no hay producciones acá. ¡Sé el primero/a!</div>`
+                  : `<div class="card-grid">${items.map(renderPostCard).join('')}</div>`}
+              </div>`;
+          }).join('')}
+        </div>
+      `).join('')}
+    </section>
+  `;
+}
+
+function renderPostCard(post){
+  const isImage = post.fileType && post.fileType.indexOf('image/')===0;
+  let mediaHtml = '';
+  if (isImage && post.fileUrl){
+    mediaHtml = `<a href="${esc(post.fileUrl)}" target="_blank" rel="noreferrer" class="post-thumb"><img src="${esc(post.fileUrl)}" alt="${esc(post.titulo)}" loading="lazy"></a>`;
+  } else if (post.fileUrl){
+    mediaHtml = `<a href="${esc(post.fileUrl)}" target="_blank" rel="noreferrer" class="post-file"><span class="post-file-icon">📄</span><span class="post-file-name">${esc(post.fileName||'Ver archivo')}</span></a>`;
+  }
+  return `
+    <article class="post-card">
+      <div class="stamp">${esc(post.encuentro)}</div>
+      ${mediaHtml}
+      <div class="post-body">
+        <h5 class="post-title">${esc(post.titulo)}</h5>
+        ${post.descripcion ? `<p class="post-desc">${esc(post.descripcion)}</p>` : ''}
+        <div class="post-meta">
+          <span class="post-author">${esc(post.nombre)}</span><span class="post-sep">·</span>
+          <span>${esc(post.institucion)}</span><span class="post-sep">·</span><span>${esc(post.area)}</span>
+        </div>
+        <div class="post-time">${esc(fmtDate(post.timestamp))}</div>
+      </div>
+    </article>
+  `;
+}
+
+function bindPageEvents(){
+  document.getElementById('btn-refresh').addEventListener('click', ()=>fetchAll(false));
+  document.getElementById('btn-open-upload').addEventListener('click', ()=>openUpload(state.tab==='todos'?'cordon1':state.tab, null));
+  document.querySelectorAll('[data-tab]').forEach(el=>{
+    el.addEventListener('click', ()=>{ state.tab = el.getAttribute('data-tab'); renderPage(); });
+  });
+  document.querySelectorAll('[data-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.getAttribute('data-jump');
+      document.getElementById('section-'+id)?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+  document.querySelectorAll('[data-add-here]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const [cordon, mat] = el.getAttribute('data-add-here').split('|');
+      openUpload(cordon, mat);
+    });
+  });
+}
+
+/* ================================================================== */
+/*  RENDER: MODAL DE CARGA                                             */
+/* ================================================================== */
+function openUpload(cordon, materialId){
+  modalState.open = true;
+  modalState.cordon = cordon;
+  modalState.encuentro = materialId ? MATERIAL_BY_ID[materialId].encuentro : '2';
+  modalState.categoria = materialId || '';
+  modalState.titulo = '';
+  modalState.descripcion = '';
+  modalState.fileMeta = null;
+  modalState.fileError = '';
+  modalState.formError = '';
+  modalState.saving = false;
+  renderModal();
+}
+function closeUpload(){
+  modalState.open = false;
+  renderModal();
+}
+
+function renderModal(){
+  const root = document.getElementById('modal-root');
+  if (!modalState.open){ root.innerHTML=''; return; }
+
+  const materiales = ENCUENTROS.find(e=>e.id===modalState.encuentro).materiales;
+
+  root.innerHTML = `
+    <div class="modal-backdrop" id="modal-backdrop">
+      <div class="modal" id="modal-box">
+        <div class="modal-head">
+          <h3>Subir material</h3>
+          <button class="modal-close" id="modal-close-btn" aria-label="Cerrar">✕</button>
+        </div>
+        <form class="modal-form" id="upload-form">
+          <div class="field-row">
+            <label>Nombre y apellido<input id="f-nombre" value="${esc(modalState.nombre)}" placeholder="Ej: Ana Pérez"></label>
+            <label>Institución<input id="f-institucion" value="${esc(modalState.institucion)}" placeholder="Ej: Escuela N.º 12"></label>
+            <label>Área<input id="f-area" value="${esc(modalState.area)}" placeholder="Ej: Lengua"></label>
+          </div>
+          <div class="field-row">
+            <label>Cordón
+              <select id="f-cordon">
+                ${CORDONES.map(c=>`<option value="${c.id}" ${modalState.cordon===c.id?'selected':''}>${c.label}</option>`).join('')}
+              </select>
+            </label>
+            <label>Encuentro
+              <select id="f-encuentro">
+                ${ENCUENTROS.map(e=>`<option value="${e.id}" ${modalState.encuentro===e.id?'selected':''}>Encuentro ${e.id} — "${esc(e.titulo)}"</option>`).join('')}
+              </select>
+            </label>
+          </div>
+          <label class="full">Material
+            <select id="f-categoria">
+              <option value="">Elegí una opción…</option>
+              ${materiales.map(m=>`<option value="${m.id}" ${modalState.categoria===m.id?'selected':''}>${esc(m.nombre)}</option>`).join('')}
+            </select>
+          </label>
+          <label class="full">Título de tu producción
+            <input id="f-titulo" value="${esc(modalState.titulo)}" placeholder='Ej: "Mega-prompt para taller de escritura"'>
+          </label>
+          <label class="full">Nota o descripción (opcional)
+            <textarea id="f-descripcion" rows="3" placeholder="Contanos brevemente de qué se trata, ajustes que hiciste, contexto, etc.">${esc(modalState.descripcion)}</textarea>
+          </label>
+          <label class="full">Captura, foto o documento
+            <input type="file" id="f-file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt">
+          </label>
+          ${modalState.fileMeta ? `
+            <div class="file-preview">
+              ${modalState.fileMeta.fileType.indexOf('image/')===0
+                ? `<img src="${modalState.fileMeta.fileDataUrl}" alt="preview">`
+                : `<span>📄 ${esc(modalState.fileMeta.fileName)}</span>`}
+            </div>` : ''}
+          ${modalState.fileError ? `<div class="form-error">${esc(modalState.fileError)}</div>` : ''}
+          ${modalState.formError ? `<div class="form-error">${esc(modalState.formError)}</div>` : ''}
+          <p class="modal-privacy">Lo que subas queda visible para todas las personas del taller que abran esta bitácora.</p>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="modal-cancel-btn">Cancelar</button>
+            <button type="submit" class="btn-primary" id="modal-submit-btn" ${modalState.saving?'disabled':''}>${modalState.saving?'Guardando…':'Compartir en la bitácora'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  bindModalEvents();
+}
+
+function bindModalEvents(){
+  document.getElementById('modal-backdrop').addEventListener('click', (e)=>{ if(e.target.id==='modal-backdrop') closeUpload(); });
+  document.getElementById('modal-close-btn').addEventListener('click', closeUpload);
+  document.getElementById('modal-cancel-btn').addEventListener('click', closeUpload);
+
+  document.getElementById('f-cordon').addEventListener('change', (e)=>{ modalState.cordon = e.target.value; });
+  document.getElementById('f-encuentro').addEventListener('change', (e)=>{
+    modalState.encuentro = e.target.value;
+    modalState.categoria = '';
+    renderModal();
+  });
+  document.getElementById('f-categoria').addEventListener('change', (e)=>{ modalState.categoria = e.target.value; });
+  document.getElementById('f-titulo').addEventListener('input', (e)=>{ modalState.titulo = e.target.value; });
+  document.getElementById('f-descripcion').addEventListener('input', (e)=>{ modalState.descripcion = e.target.value; });
+  document.getElementById('f-nombre').addEventListener('input', (e)=>{ modalState.nombre = e.target.value; });
+  document.getElementById('f-institucion').addEventListener('input', (e)=>{ modalState.institucion = e.target.value; });
+  document.getElementById('f-area').addEventListener('input', (e)=>{ modalState.area = e.target.value; });
+
+  document.getElementById('f-file').addEventListener('change', async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    modalState.fileError = ''; modalState.fileMeta = null;
+    if (!file) { renderModal(); return; }
+    try {
+      if (file.type.indexOf('image/')===0){
+        const dataUrl = await compressImage(file);
+        modalState.fileMeta = { fileName:file.name, fileType:'image/jpeg', fileDataUrl:dataUrl };
+      } else {
+        if (file.size > MAX_DOC_BYTES){
+          modalState.fileError = `El archivo pesa ${(file.size/1024/1024).toFixed(1)}MB. Máximo recomendado: ${(MAX_DOC_BYTES/1024/1024).toFixed(1)}MB. Probá exportarlo más liviano o pegar una captura en su lugar.`;
+          renderModal(); return;
+        }
+        const dataUrl = await readAsDataURL(file);
+        modalState.fileMeta = { fileName:file.name, fileType:file.type||'application/octet-stream', fileDataUrl:dataUrl };
+      }
+    } catch(err){
+      modalState.fileError = 'No se pudo procesar el archivo. Probá con otro.';
+    }
+    renderModal();
+  });
+
+  document.getElementById('upload-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    modalState.formError = '';
+    if (!modalState.nombre.trim() || !modalState.institucion.trim() || !modalState.area.trim()){
+      modalState.formError = 'Completá nombre y apellido, institución y área.'; renderModal(); return;
+    }
+    if (!modalState.categoria){ modalState.formError = 'Elegí a qué material corresponde tu producción.'; renderModal(); return; }
+    if (!modalState.titulo.trim()){ modalState.formError = 'Ponele un título breve a tu producción.'; renderModal(); return; }
+    if (!modalState.fileMeta){ modalState.formError = 'Subí una captura, foto o documento.'; renderModal(); return; }
+    if (!configReady()){ modalState.formError = 'Falta configurar la URL del backend (ver README.md).'; renderModal(); return; }
+
+    modalState.saving = true; renderModal();
+    try {
+      const payload = {
+        cordon: modalState.cordon,
+        encuentro: modalState.encuentro,
+        categoria: modalState.categoria,
+        nombre: modalState.nombre.trim(),
+        institucion: modalState.institucion.trim(),
+        area: modalState.area.trim(),
+        titulo: modalState.titulo.trim(),
+        descripcion: modalState.descripcion.trim(),
+        fileName: modalState.fileMeta.fileName,
+        fileType: modalState.fileMeta.fileType,
+        fileDataBase64: modalState.fileMeta.fileDataUrl,
+      };
+      const post = await submitPost(payload);
+      state.posts[modalState.cordon] = [...state.posts[modalState.cordon], post];
+      localStorage.setItem('bitacora_me', JSON.stringify({nombre:payload.nombre, institucion:payload.institucion, area:payload.area}));
+      closeUpload();
+      renderPage();
+    } catch(err){
+      modalState.saving = false;
+      modalState.formError = 'No se pudo guardar. Probá de nuevo en unos segundos.';
+      renderModal();
+    }
+  });
+}
+
+/* ================================================================== */
+/*  INIT                                                                */
+/* ================================================================== */
+renderPage();
+fetchAll(false);
+setInterval(()=>fetchAll(true), POLL_MS);
+</script>
+</body>
+</html>
