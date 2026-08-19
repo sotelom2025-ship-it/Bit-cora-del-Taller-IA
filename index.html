@@ -603,7 +603,7 @@ function bindModalEvents(){
       renderPage();
     } catch(err){
       modalState.saving = false;
-      modalState.formError = 'No se pudo guardar. Probá de nuevo en unos segundos.';
+      modalState.formError = 'No se pudo guardar. Detalle técnico: ' + (err && err.message ? err.message : String(err));
       renderModal();
     }
   });
